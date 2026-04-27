@@ -20,7 +20,7 @@ ARG HALO_PG_CLIENT_MAJORS="14 15 16 17 18"
 ARG USE_TIKTOKEN_ENCODING_NAME="cl100k_base"
 
 ARG BUILD_HASH=dev-build
-ARG HALO_RUNTIME_PROFILE=main
+ARG HALO_RUNTIME_PROFILE=slim
 # Override at your own risk - non-root configurations are untested
 ARG UID=0
 ARG GID=0
@@ -34,7 +34,7 @@ ARG VITE_SOURCEMAP=false
 WORKDIR /app
 
 COPY package.json package-lock.json .npmrc ./
-RUN npm ci
+RUN npm ci --no-audit --fund=false
 
 COPY src ./src
 COPY static ./static
@@ -70,6 +70,8 @@ ARG HALO_RUNTIME_PROFILE
 
 ENV ENV=prod \
     PORT=8080 \
+    PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
     USE_OLLAMA_DOCKER=${USE_OLLAMA} \
     INSTALL_PROFILE=${INSTALL_PROFILE} \
     PRELOAD_LOCAL_MODELS=${PRELOAD_LOCAL_MODELS} \
@@ -91,6 +93,10 @@ ENV ENV=prod \
     TIKTOKEN_ENCODING_NAME="$USE_TIKTOKEN_ENCODING_NAME" \
     TIKTOKEN_CACHE_DIR="/app/backend/data/cache/tiktoken" \
     HF_HOME="/app/backend/data/cache/embedding/models" \
+    DATABASE_POOL_SIZE=5 \
+    DATABASE_POOL_MAX_OVERFLOW=0 \
+    DATABASE_POOL_TIMEOUT=30 \
+    DATABASE_POOL_RECYCLE=1800 \
     HALO_RUNTIME_PROFILE=${HALO_RUNTIME_PROFILE} \
     HOME=/root
 
